@@ -1,0 +1,72 @@
+.item {
+    width: 100vw;
+    display: flex;
+    flex-direction: column;
+    margin-top: 2vw;
+    background-color: #fff;
+    box-shadow: 1vw 0.3vw 0.3vw #ccc;
+}
+
+.header {
+    height: 5vw;
+    font-size: 3.2vw;
+    padding-left: 2.5vw;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    color: #1ba9ff;
+    border-bottom: solid 0.1vw #999;
+}
+
+.title {
+    margin-top: 4vw;
+    margin-bottom: 2.5vw;
+    padding-left: 2.5vw;
+    padding-right: 2.5vw;
+    display: flex;
+    flex-direction: column;
+}
+
+.name {
+    font-size: 4.2vw;
+    font-weight: bold;
+}
+
+.specification {
+    font-size: 3.8vw;
+}
+
+.info {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}
+
+.price {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    padding-bottom: 2.5vw;
+}
+
+.price-title {
+    font-style: italic;
+    font-size: 3.8vw;
+}
+
+.price-value {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-content: space-between;
+}
+
+.gpitem {
+    margin-top: 1vw;
+    flex: 0 0 25%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

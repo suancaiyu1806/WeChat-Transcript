@@ -1,0 +1,21 @@
+.search {
+    position: sticky;
+    top: 0px;
+    z-index: 999;
+}
+
+.create {
+    position: fixed;
+    bottom: 12vw;
+    right: 8vw;
+    width: 15vw;
+    height: 15vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 7.5vw;
+    background-color: rgba(29, 154, 228, 0.8);
+    color: #fff;
+    font-size: 12vw;
+    font-weight: bold;
+}

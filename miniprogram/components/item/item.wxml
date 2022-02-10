@@ -1,0 +1,35 @@
+<view class="item">
+    <view class="header">{{customer}}</view>
+    <view class="content">
+        <view class="title">
+            <view class="name">{{product}}</view>
+            <view class="specification">规格：{{specification}}</view>
+        </view>
+        <view class="info">
+            <view class="price">
+                <view class="price-title">进价</view>
+                <view class="price-value">
+                    <van-tag plain class="gpitem" wx:for="{{tran_purchase_price}}">{{item}}</van-tag>
+                </view>
+            </view>
+            <view class="price">
+                <view class="price-title">单价</view>
+                <view class="price-value">
+                    <van-tag plain class="gpitem" wx:for="{{tran_unit_price}}">{{item}}</van-tag>
+                </view>
+            </view>
+            <view class="price">
+                <view class="price-title">售价</view>
+                <view class="price-value">
+                    <van-tag plain class="gpitem" wx:for="{{tran_selling_price}}">{{item}}</van-tag>
+                </view>
+            </view>
+            <view class="price">
+                <view class="price-title">批发价</view>
+                <view class="price-value">
+                    <van-tag plain class="gpitem" wx:for="{{tran_wholesale_price}}">{{item}}</van-tag>
+                </view>
+            </view>
+        </view>
+    </view>
+</view>

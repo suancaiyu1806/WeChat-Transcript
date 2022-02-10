@@ -1,0 +1,1 @@
+"D:\WeChatDevTools\微信web开发者工具\cli.bat" cloud functions deploy --e cloud1-7gee3xcp6dffcd9e --n quickstartFunctions --r --project "E:\Codes\TranScript" --report_first --report
