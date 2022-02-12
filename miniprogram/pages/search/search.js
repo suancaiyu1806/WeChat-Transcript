@@ -5,18 +5,11 @@ Page({
      * 页面的初始数据
      */
     data: {
+        value: null,
+        loading: false,
         pageNum: 0,
-        items: [{
-            id: '',
-            customer: '榕城 B07--15252552155',
-            product: '某年某日0添蔗糖乳茶白桃乌龙（港式原味）',
-            specification: '1*24',
-            purchase_price: '64',
-            unit_price: '64 64 64 64 64',
-            selling_price: '64',
-            wholesale_price: '64 64',
-        }],
-        localSchools: [],
+        queryItems: [],
+        items: [],
         searching: false,
     },
 
@@ -31,7 +24,9 @@ Page({
      * 生命周期函数--监听页面初次渲染完成
      */
     onReady: function () {
-        this.onQuery();
+        this.onQuery().then(() =>
+            this.setData({ items: this.data.queryItems })
+        );
     },
 
     /**
@@ -44,62 +39,80 @@ Page({
     /**
      * 自定义函数
      */
-
     onChange(e) {
         this.setData({
             value: e.detail,
         });
     },
-    onSearch() {
-        this.data.value?.length > 1 ?
-            this.onQuery(this.data.value) : '';
-        console.log('搜索' + this.data.value);
+    async onSearch() {
+        this.setData({
+            items: [],
+            searching: true,
+            pageNum: 0,
+        });
+        await this.onQuery();
+        this.data.value?.length > 0 ?
+            this.setData({ items: this.data.queryItems })
+            : '';
     },
-    onQuery(pageNum = 0) {
-
-        const db = wx.cloud.database()
-        // 查询当前用户所有的 counters
+    async onQuery(pageNum = 0) {
+        const db = wx.cloud.database();
+        this.setData({
+            queryItems: [],
+        });
         if (this.data.value) {
-            this.setData({
-                items: [],
-                searching: true
-            })
-            db.collection('items').where({
-                product: db.RegExp({
-                    regexp: '.*' + this.data.value + '.*',
-                    options: 's',
-                })
-            }).get({
-                success: res => {
-                    this.setData({
-                        items: res.data,
+            await new Promise((resolve) => {
+                db.collection('items').where({
+                    product: db.RegExp({
+                        regexp: '.*' + this.data.value + '.*',
+                        options: 's',
                     })
-                },
-                fail: err => {
-                    wx.showToast({
-                        icon: 'none',
-                        title: '查询记录失败'
-                    })
-                }
-            })
+                }).skip(pageNum * 10) //从第几个数据开始
+                    .limit(pageNum * 10 + 10)
+                    .get({
+                        success: res => {
+                            this.setData({ queryItems: res.data });
+                            resolve(true);
+                        },
+                        fail: err => {
+                            wx.showToast({
+                                icon: 'none',
+                                title: '查询记录失败'
+                            })
+                            resolve(false);
+                        }
+                    });
+            });
         } else {
-            db.collection('items')
-                .skip(pageNum * 10) //从第几个数据开始
-                .limit(pageNum * 10 + 10)
-                .get({
-                    success: res => {
-                        this.setData({
-                            items: res.data,
-                        })
-                    },
-                    fail: err => {
-                        wx.showToast({
-                            icon: 'none',
-                            title: '查询记录失败'
-                        })
-                    }
-                })
+            await new Promise((resolve) => {
+                db.collection('items')
+                    .skip(pageNum * 10) //从第几个数据开始
+                    .limit(pageNum * 10 + 10)
+                    .get({
+                        success: res => {
+                            this.setData({ queryItems: res.data });
+                            resolve(true);
+                        },
+                        fail: err => {
+                            wx.showToast({
+                                icon: 'none',
+                                title: '查询记录失败'
+                            });
+                            resolve(false);
+                        }
+                    });
+            });
         }
+    },
+    toEdit(e){
+        wx.redirectTo({
+            url: `../detail/detail?itemId=${e.currentTarget.id}&isEdit=true`,
+        })
+    },
+    toCreate() {
+        wx.redirectTo({
+            url: '../detail/detail?isEdit=false',
+        })
     },
 
     /**
@@ -127,15 +140,29 @@ Page({
      * 页面上拉触底事件的处理函数
      */
     onReachBottom: function () {
+        this.setData({ loading: true });
         if (!this.data.searching) {
-            console.log("触底触底");
-            const nextItems = this.onQuery(this.data.pageNum + 1);
-            this.setData({
-                pageNum: this.data.pageNum + 1,
-                items: [...this.data.items,...nextItems]|| [],
-            });
+            console.log("查看触底");
+            this.onQuery(this.data.pageNum + 1).then(() => {
+                const preItems = [...this.data.items];
+                this.setData({
+                    pageNum: this.data.pageNum + 1,
+                    items: preItems.concat(this.data.queryItems),
+                    loading: false,
+                });
+            }
+            );
         } else {
-
+            console.log("搜索触底");
+            this.onQuery(this.data.pageNum + 1).then(() => {
+                const preItems = [...this.data.items];
+                this.setData({
+                    pageNum: this.data.pageNum + 1,
+                    items: preItems.concat(this.data.queryItems),
+                    loading: false,
+                });
+            }
+            );
         }
     },
 
