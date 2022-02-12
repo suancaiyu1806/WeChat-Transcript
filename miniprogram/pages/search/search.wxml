@@ -6,7 +6,6 @@
   <goods-item customer="{{item.customer}}" product="{{item.product}}" specification="{{item.specification}}" purchase_price="{{item.purchase_price}}" unit_price="{{item.unit_price}}" selling_price="{{item.selling_price}}" wholesale_price="{{item.wholesale_price}}">
   </goods-item>
 </view>
-
 <view class="create">
   <image src="../../images/add.svg"></image>
 </view>
