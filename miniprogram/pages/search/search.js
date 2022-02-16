@@ -57,17 +57,26 @@ Page({
     },
     async onQuery(pageNum = 0) {
         const db = wx.cloud.database();
+        const _ = db.command;
         this.setData({
             queryItems: [],
         });
         if (this.data.value) {
             await new Promise((resolve) => {
-                db.collection('items').where({
-                    product: db.RegExp({
-                        regexp: '.*' + this.data.value + '.*',
-                        options: 's',
-                    })
-                }).skip(pageNum * 10) //从第几个数据开始
+                db.collection('items').where(_.or([
+                    {
+                        product: db.RegExp({
+                            regexp: '.*' + this.data.value + '.*',
+                            options: 's',
+                        })
+                    },
+                    {
+                        customer: db.RegExp({
+                            regexp: '.*' + this.data.value + '.*',
+                            options: 's',
+                        })
+                    }
+                ])).skip(pageNum * 10) //从第几个数据开始
                     .limit(pageNum * 10 + 10)
                     .get({
                         success: res => {
@@ -104,7 +113,7 @@ Page({
             });
         }
     },
-    toEdit(e){
+    toEdit(e) {
         wx.redirectTo({
             url: `../detail/detail?itemId=${e.currentTarget.id}&isEdit=true`,
         })
