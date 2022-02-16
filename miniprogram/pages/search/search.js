@@ -10,7 +10,6 @@ Page({
         pageNum: 0,
         queryItems: [],
         items: [],
-        cacheItems: [],
         searching: false,
     },
 
@@ -18,43 +17,16 @@ Page({
      * 生命周期函数--监听页面加载
      */
     onLoad: function (options) {
-        try {
-            let cacheItems = wx.getStorageSync('items');
-            if (!cacheItems) {
-                const db = wx.cloud.database();
-                db.collection('cacheItems')
-                    .skip(0) //从第几个数据开始
-                    .limit(1)
-                    .get({
-                        success: res => {
-                            wx.setStorageSync('items', res.data[0]?.items )
-                        },
-                    })
-                console.log("缓存为空")
-            } else {
-                this.setData({ cacheItems});
-            }
-        } catch (e) {
-            console.log("error")
-        }
+
     },
 
     /**
      * 生命周期函数--监听页面初次渲染完成
      */
     onReady: function () {
-        let cacheItems = wx.getStorageSync('items');
-        if (cacheItems.length > 0) {
-            this.onCacheQuery().then(() =>
-                this.setData({
-                    items: this.data.queryItems
-                })
-            );
-        } else {
-            this.onQuery().then(() =>
-                this.setData({ items: this.data.queryItems })
-            );
-        }
+        this.onQuery().then(() =>
+            this.setData({ items: this.data.queryItems })
+        );
     },
 
     /**
@@ -73,20 +45,15 @@ Page({
         });
     },
     async onSearch() {
-        if (!this.data.value?.length) return;
         this.setData({
             items: [],
             searching: true,
             pageNum: 0,
         });
-        if (this.data.cacheItems.length) {
-            this.onCacheQuery().then(() => {
-                this.setData({ items: this.data.queryItems });
-            });
-        } else {
-            await this.onQuery();
-            this.setData({ items: this.data.queryItems });
-        }
+        await this.onQuery();
+        this.data.value?.length > 0 ?
+            this.setData({ items: this.data.queryItems })
+            : '';
     },
     async onQuery(pageNum = 0) {
         const db = wx.cloud.database();
@@ -137,26 +104,7 @@ Page({
             });
         }
     },
-    async onCacheQuery(pageNum = 0) {
-        let queryItems = [];
-        this.setData({
-            queryItems: [],
-        });
-        if (this.data.value) {
-            let reg = new RegExp(this.data.value);
-            this.data.cacheItems.map(item => {
-                if (reg.test(item.customer)||reg.test(item.product)) {
-                    queryItems.push(item);
-                }
-            }); 
-            this.setData({ queryItems: queryItems.slice(pageNum * 10, pageNum * 10 + 10) });
-            console.log('queryItems',queryItems );
-        } else {
-            queryItems = this.data.cacheItems.slice(pageNum * 10, pageNum * 10 + 10);
-            this.setData({ queryItems });
-        }
-    },
-    toEdit(e) {
+    toEdit(e){
         wx.redirectTo({
             url: `../detail/detail?itemId=${e.currentTarget.id}&isEdit=true`,
         })
@@ -193,16 +141,8 @@ Page({
      */
     onReachBottom: function () {
         this.setData({ loading: true });
-        if (this.data.cacheItems.length) {
-            this.onCacheQuery(this.data.pageNum + 1).then(() => {
-                const preItems = [...this.data.items];
-                this.setData({
-                    pageNum: this.data.pageNum + 1,
-                    items: preItems.concat(this.data.queryItems),
-                    loading: false,
-                });
-            });
-        } else {
+        if (!this.data.searching) {
+            console.log("查看触底");
             this.onQuery(this.data.pageNum + 1).then(() => {
                 const preItems = [...this.data.items];
                 this.setData({
@@ -210,7 +150,19 @@ Page({
                     items: preItems.concat(this.data.queryItems),
                     loading: false,
                 });
-            });
+            }
+            );
+        } else {
+            console.log("搜索触底");
+            this.onQuery(this.data.pageNum + 1).then(() => {
+                const preItems = [...this.data.items];
+                this.setData({
+                    pageNum: this.data.pageNum + 1,
+                    items: preItems.concat(this.data.queryItems),
+                    loading: false,
+                });
+            }
+            );
         }
     },
 
